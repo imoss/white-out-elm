@@ -6189,11 +6189,11 @@ var $author$project$HomePage$makeBox = F2(
 	});
 var $author$project$HomePage$addBox = F2(
 	function (position, group) {
-		var uid = group.uid;
 		var idleBoxes = group.idleBoxes;
+		var count = $elm$core$List$length(idleBoxes) + 1;
 		var id = {
 			corner: $author$project$HomePage$None,
-			uid: $elm$core$String$fromInt(uid)
+			uid: $elm$core$String$fromInt(count)
 		};
 		return _Utils_update(
 			group,
@@ -6201,15 +6201,14 @@ var $author$project$HomePage$addBox = F2(
 				idleBoxes: A2(
 					$elm$core$List$cons,
 					A2($author$project$HomePage$makeBox, id, position),
-					idleBoxes),
-				uid: uid + 1
+					idleBoxes)
 			});
 	});
-var $author$project$HomePage$BoxGroup = F3(
-	function (uid, movingBox, idleBoxes) {
-		return {idleBoxes: idleBoxes, movingBox: movingBox, uid: uid};
+var $author$project$HomePage$BoxGroup = F2(
+	function (movingBox, idleBoxes) {
+		return {idleBoxes: idleBoxes, movingBox: movingBox};
 	});
-var $author$project$HomePage$emptyGroup = A3($author$project$HomePage$BoxGroup, 0, $elm$core$Maybe$Nothing, _List_Nil);
+var $author$project$HomePage$emptyGroup = A2($author$project$HomePage$BoxGroup, $elm$core$Maybe$Nothing, _List_Nil);
 var $author$project$HomePage$makeBoxGroup = function (positions) {
 	return A3($elm$core$List$foldl, $author$project$HomePage$addBox, $author$project$HomePage$emptyGroup, positions);
 };
@@ -6791,6 +6790,7 @@ var $elm$core$List$head = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$List$partition = F2(
 	function (pred, list) {
 		var step = F2(
@@ -6821,6 +6821,8 @@ var $author$project$HomePage$startDragging = F2(
 			idleBoxes);
 		var targetAsList = _v0.a;
 		var others = _v0.b;
+		var _v1 = A2($elm$core$Debug$log, 'targetAsList', targetAsList);
+		var _v2 = A2($elm$core$Debug$log, 'others', others);
 		return _Utils_update(
 			group,
 			{

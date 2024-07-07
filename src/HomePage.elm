@@ -10,8 +10,6 @@ import Math.Vector2 as Vector2 exposing (Vec2, getX, getY)
 import Svg exposing (Svg)
 import Svg.Attributes as Attr
 import Svg.Events exposing (onMouseUp)
-import Svg.Keyed
-import Svg.Lazy exposing (lazy)
 
 
 main : Program () Model Msg
@@ -84,29 +82,28 @@ dragBoxBy delta corner box =
 
 
 type alias BoxGroup =
-    { uid : Int
-    , movingBox : Maybe Box
+    { movingBox : Maybe Box
     , idleBoxes : List Box
     }
 
 
 emptyGroup : BoxGroup
 emptyGroup =
-    BoxGroup 0 Nothing []
+    BoxGroup Nothing []
 
 
 addBox : Vec2 -> BoxGroup -> BoxGroup
-addBox position ({ uid, idleBoxes } as group) =
+addBox position ({ idleBoxes } as group) =
     let
+        count =
+            List.length idleBoxes + 1
+
         id =
-            { uid = String.fromInt uid
+            { uid = String.fromInt count
             , corner = None
             }
     in
-    { group
-        | idleBoxes = makeBox id position :: idleBoxes
-        , uid = uid + 1
-    }
+    { group | idleBoxes = makeBox id position :: idleBoxes }
 
 
 makeBoxGroup : List Vec2 -> BoxGroup
@@ -127,6 +124,12 @@ startDragging id ({ idleBoxes, movingBox } as group) =
     let
         ( targetAsList, others ) =
             List.partition (\box -> id.uid == box.id.uid) idleBoxes
+
+        _ =
+            Debug.log "targetAsList" targetAsList
+
+        _ =
+            Debug.log "others" others
     in
     { group
         | idleBoxes = others
