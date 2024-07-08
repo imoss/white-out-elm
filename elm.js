@@ -6180,8 +6180,8 @@ var $zaboco$elm_draggable$Draggable$State = function (a) {
 };
 var $zaboco$elm_draggable$Draggable$init = $zaboco$elm_draggable$Draggable$State($zaboco$elm_draggable$Internal$NotDragging);
 var $author$project$HomePage$Box = F4(
-	function (id, position, height, width) {
-		return {height: height, id: id, position: position, width: width};
+	function (details, position, height, width) {
+		return {details: details, height: height, position: position, width: width};
 	});
 var $author$project$HomePage$makeBox = F2(
 	function (id, position) {
@@ -6686,21 +6686,47 @@ var $author$project$HomePage$subscriptions = function (_v0) {
 };
 var $elm_explorations$linear_algebra$Math$Vector2$add = _MJS_v2add;
 var $elm_explorations$linear_algebra$Math$Vector2$toRecord = _MJS_v2toRecord;
+var $elm_explorations$linear_algebra$Math$Vector2$vec2 = _MJS_v2;
 var $author$project$HomePage$dragBoxBy = F3(
 	function (delta, corner, box) {
 		var record = $elm_explorations$linear_algebra$Math$Vector2$toRecord(delta);
-		if (corner.$ === 'BottomRight') {
-			var newWidth = ((box.width + record.x) <= 1) ? 1 : (box.width + record.x);
-			var newHeight = ((box.height + record.y) <= 1) ? 1 : (box.height + record.y);
-			return _Utils_update(
-				box,
-				{height: newHeight, width: newWidth});
-		} else {
-			return _Utils_update(
-				box,
-				{
-					position: A2($elm_explorations$linear_algebra$Math$Vector2$add, delta, box.position)
-				});
+		var existingPosRecord = $elm_explorations$linear_algebra$Math$Vector2$toRecord(box.position);
+		switch (corner.$) {
+			case 'BottomRight':
+				var newWidth = ((box.width + record.x) <= 1) ? 1 : (box.width + record.x);
+				var newHeight = ((box.height + record.y) <= 1) ? 1 : (box.height + record.y);
+				return _Utils_update(
+					box,
+					{height: newHeight, width: newWidth});
+			case 'TopRight':
+				var newYPos = (box.height === 1) ? existingPosRecord.y : (existingPosRecord.y + record.y);
+				var newWidth = ((box.width + record.x) <= 1) ? 1 : (box.width + record.x);
+				var newHeight = ((box.height - record.y) <= 1) ? 1 : (box.height - record.y);
+				return _Utils_update(
+					box,
+					{
+						height: newHeight,
+						position: A2($elm_explorations$linear_algebra$Math$Vector2$vec2, existingPosRecord.x, newYPos),
+						width: newWidth
+					});
+			case 'TopLeft':
+				var newYPos = (box.height === 1) ? existingPosRecord.y : (existingPosRecord.y + record.y);
+				var newXPos = (box.width === 1) ? existingPosRecord.x : (existingPosRecord.x + record.x);
+				var newWidth = ((box.width - record.x) <= 1) ? 1 : (box.width - record.x);
+				var newHeight = ((box.height - record.y) <= 1) ? 1 : (box.height - record.y);
+				return _Utils_update(
+					box,
+					{
+						height: newHeight,
+						position: A2($elm_explorations$linear_algebra$Math$Vector2$vec2, newXPos, newYPos),
+						width: newWidth
+					});
+			default:
+				return _Utils_update(
+					box,
+					{
+						position: A2($elm_explorations$linear_algebra$Math$Vector2$add, delta, box.position)
+					});
 		}
 	});
 var $elm$core$Maybe$map = F2(
@@ -6768,7 +6794,6 @@ var $zaboco$elm_draggable$Draggable$Events$onDragStart = F2(
 				onDragStart: A2($elm$core$Basics$composeL, $elm$core$Maybe$Just, toMsg)
 			});
 	});
-var $elm_explorations$linear_algebra$Math$Vector2$vec2 = _MJS_v2;
 var $author$project$HomePage$dragConfig = $zaboco$elm_draggable$Draggable$customConfig(
 	_List_fromArray(
 		[
@@ -6790,7 +6815,6 @@ var $elm$core$List$head = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
-var $elm$core$Debug$log = _Debug_log;
 var $elm$core$List$partition = F2(
 	function (pred, list) {
 		var step = F2(
@@ -6810,19 +6834,17 @@ var $elm$core$List$partition = F2(
 			list);
 	});
 var $author$project$HomePage$startDragging = F2(
-	function (id, group) {
+	function (details, group) {
 		var idleBoxes = group.idleBoxes;
 		var movingBox = group.movingBox;
 		var _v0 = A2(
 			$elm$core$List$partition,
 			function (box) {
-				return _Utils_eq(id.uid, box.id.uid);
+				return _Utils_eq(details.uid, box.details.uid);
 			},
 			idleBoxes);
 		var targetAsList = _v0.a;
 		var others = _v0.b;
-		var _v1 = A2($elm$core$Debug$log, 'targetAsList', targetAsList);
-		var _v2 = A2($elm$core$Debug$log, 'others', others);
 		return _Utils_update(
 			group,
 			{
@@ -6977,13 +6999,13 @@ var $author$project$HomePage$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'StartDragging':
-				var id = msg.a;
+				var details = msg.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
 						{
-							boxGroup: A2($author$project$HomePage$startDragging, id, boxGroup),
-							currentCorner: id.corner
+							boxGroup: A2($author$project$HomePage$startDragging, details, boxGroup),
+							currentCorner: details.corner
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'StopDragging':
@@ -7011,8 +7033,10 @@ var $author$project$HomePage$update = F2(
 		}
 	});
 var $author$project$HomePage$AddBox = {$: 'AddBox'};
-var $author$project$HomePage$BottomRight = {$: 'BottomRight'};
 var $author$project$HomePage$StopDragging = {$: 'StopDragging'};
+var $author$project$HomePage$BottomRight = {$: 'BottomRight'};
+var $author$project$HomePage$TopLeft = {$: 'TopLeft'};
+var $author$project$HomePage$TopRight = {$: 'TopRight'};
 var $elm$svg$Svg$trustedNode = _VirtualDom_nodeNS('http://www.w3.org/2000/svg');
 var $elm$svg$Svg$circle = $elm$svg$Svg$trustedNode('circle');
 var $elm$svg$Svg$Attributes$cursor = _VirtualDom_attribute('cursor');
@@ -7081,22 +7105,6 @@ var $author$project$HomePage$num = F2(
 		return attr(
 			$elm$core$String$fromFloat(value));
 	});
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
-	});
-var $elm$svg$Svg$Events$onMouseUp = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'mouseup',
-		$elm$json$Json$Decode$succeed(msg));
-};
 var $elm$svg$Svg$Attributes$r = _VirtualDom_attribute('r');
 var $elm$svg$Svg$rect = $elm$svg$Svg$trustedNode('rect');
 var $elm$svg$Svg$Attributes$stroke = _VirtualDom_attribute('stroke');
@@ -7104,11 +7112,11 @@ var $elm$svg$Svg$Attributes$width = _VirtualDom_attribute('width');
 var $elm$svg$Svg$Attributes$x = _VirtualDom_attribute('x');
 var $elm$svg$Svg$Attributes$y = _VirtualDom_attribute('y');
 var $author$project$HomePage$boxView = function (_v0) {
-	var id = _v0.id;
+	var details = _v0.details;
 	var position = _v0.position;
 	var height = _v0.height;
 	var width = _v0.width;
-	var uid = id.uid;
+	var uid = details.uid;
 	return _List_fromArray(
 		[
 			A2(
@@ -7131,8 +7139,7 @@ var $author$project$HomePage$boxView = function (_v0) {
 					A2(
 					$zaboco$elm_draggable$Draggable$mouseTrigger,
 					{corner: $author$project$HomePage$None, uid: uid},
-					$author$project$HomePage$DragMsg),
-					$elm$svg$Svg$Events$onMouseUp($author$project$HomePage$StopDragging)
+					$author$project$HomePage$DragMsg)
 				]),
 			_List_Nil),
 			A2(
@@ -7150,8 +7157,43 @@ var $author$project$HomePage$boxView = function (_v0) {
 					A2(
 					$zaboco$elm_draggable$Draggable$mouseTrigger,
 					{corner: $author$project$HomePage$BottomRight, uid: uid},
-					$author$project$HomePage$DragMsg),
-					$elm$svg$Svg$Events$onMouseUp($author$project$HomePage$StopDragging)
+					$author$project$HomePage$DragMsg)
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx(
+					$elm$core$String$fromFloat(
+						$elm_explorations$linear_algebra$Math$Vector2$getX(position) + width)),
+					$elm$svg$Svg$Attributes$cy(
+					$elm$core$String$fromFloat(
+						$elm_explorations$linear_algebra$Math$Vector2$getY(position))),
+					$elm$svg$Svg$Attributes$r('5'),
+					$elm$svg$Svg$Attributes$fill('red'),
+					A2(
+					$zaboco$elm_draggable$Draggable$mouseTrigger,
+					{corner: $author$project$HomePage$TopRight, uid: uid},
+					$author$project$HomePage$DragMsg)
+				]),
+			_List_Nil),
+			A2(
+			$elm$svg$Svg$circle,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$cx(
+					$elm$core$String$fromFloat(
+						$elm_explorations$linear_algebra$Math$Vector2$getX(position))),
+					$elm$svg$Svg$Attributes$cy(
+					$elm$core$String$fromFloat(
+						$elm_explorations$linear_algebra$Math$Vector2$getY(position))),
+					$elm$svg$Svg$Attributes$r('5'),
+					$elm$svg$Svg$Attributes$fill('red'),
+					A2(
+					$zaboco$elm_draggable$Draggable$mouseTrigger,
+					{corner: $author$project$HomePage$TopLeft, uid: uid},
+					$author$project$HomePage$DragMsg)
 				]),
 			_List_Nil)
 		]);
@@ -7192,14 +7234,6 @@ var $author$project$HomePage$boxesView = function (boxGroup) {
 				$author$project$HomePage$allBoxes(boxGroup))));
 };
 var $elm$html$Html$button = _VirtualDom_node('button');
-var $elm$html$Html$div = _VirtualDom_node('div');
-var $elm$html$Html$img = _VirtualDom_node('img');
-var $elm$html$Html$Events$onClick = function (msg) {
-	return A2(
-		$elm$html$Html$Events$on,
-		'click',
-		$elm$json$Json$Decode$succeed(msg));
-};
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
@@ -7208,6 +7242,31 @@ var $elm$html$Html$Attributes$stringProperty = F2(
 			key,
 			$elm$json$Json$Encode$string(string));
 	});
+var $elm$html$Html$Attributes$class = $elm$html$Html$Attributes$stringProperty('className');
+var $elm$html$Html$div = _VirtualDom_node('div');
+var $elm$html$Html$img = _VirtualDom_node('img');
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onClick = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'click',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $elm$html$Html$Events$onMouseUp = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'mouseup',
+		$elm$json$Json$Decode$succeed(msg));
+};
 var $elm$html$Html$Attributes$src = function (url) {
 	return A2(
 		$elm$html$Html$Attributes$stringProperty,
@@ -7242,22 +7301,32 @@ var $author$project$HomePage$view = function (_v0) {
 							]))
 					])),
 				A2(
-				$elm$svg$Svg$svg,
+				$elm$html$Html$div,
 				_List_fromArray(
 					[
-						$elm$svg$Svg$Attributes$style('top: 20px; height: 100vh; width: 100vw; position: absolute;')
+						$elm$html$Html$Attributes$class('svg-container'),
+						$elm$html$Html$Events$onMouseUp($author$project$HomePage$StopDragging)
 					]),
 				_List_fromArray(
 					[
-						$author$project$HomePage$boxesView(boxGroup)
-					])),
-				A2(
-				$elm$html$Html$img,
-				_List_fromArray(
-					[
-						$elm$html$Html$Attributes$src('img/dan-da-dan.jpg')
-					]),
-				_List_Nil)
+						A2(
+						$elm$svg$Svg$svg,
+						_List_fromArray(
+							[
+								$elm$svg$Svg$Attributes$style('top: 20px; height: 100vh; width: 100vw; position: absolute;')
+							]),
+						_List_fromArray(
+							[
+								$author$project$HomePage$boxesView(boxGroup)
+							])),
+						A2(
+						$elm$html$Html$img,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$src('img/p1.png')
+							]),
+						_List_Nil)
+					]))
 			]));
 };
 var $author$project$HomePage$main = $elm$browser$Browser$element(

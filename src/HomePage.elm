@@ -5,11 +5,10 @@ import Draggable
 import Draggable.Events exposing (onDragBy, onDragStart)
 import Html exposing (Html)
 import Html.Attributes
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onMouseUp)
 import Math.Vector2 as Vector2 exposing (Vec2, getX, getY)
 import Svg exposing (Svg)
 import Svg.Attributes as Attr
-import Svg.Events exposing (onMouseUp)
 
 
 main : Program () Model Msg
@@ -23,14 +22,14 @@ main =
 
 
 type alias Box =
-    { id : Id
+    { details : DragDetails
     , position : Vec2
     , height : Float
     , width : Float
     }
 
 
-type alias Id =
+type alias DragDetails =
     { uid : String
     , corner : Corner
     }
@@ -44,7 +43,7 @@ type Corner
     | None
 
 
-makeBox : Id -> Vec2 -> Box
+makeBox : DragDetails -> Vec2 -> Box
 makeBox id position =
     Box id position 50.0 100.0
 
@@ -54,6 +53,9 @@ dragBoxBy delta corner box =
     let
         record =
             Vector2.toRecord delta
+
+        existingPosRecord =
+            Vector2.toRecord box.position
     in
     case corner of
         BottomRight ->
@@ -75,6 +77,71 @@ dragBoxBy delta corner box =
             { box
                 | height = newHeight
                 , width = newWidth
+            }
+
+        TopRight ->
+            let
+                newHeight =
+                    if box.height - record.y <= 1 then
+                        1
+
+                    else
+                        box.height - record.y
+
+                newWidth =
+                    if box.width + record.x <= 1 then
+                        1
+
+                    else
+                        box.width + record.x
+
+                newYPos =
+                    if box.height == 1 then
+                        existingPosRecord.y
+
+                    else
+                        existingPosRecord.y + record.y
+            in
+            { box
+                | height = newHeight
+                , width = newWidth
+                , position = Vector2.vec2 existingPosRecord.x newYPos
+            }
+
+        TopLeft ->
+            let
+                newHeight =
+                    if box.height - record.y <= 1 then
+                        1
+
+                    else
+                        box.height - record.y
+
+                newWidth =
+                    if box.width - record.x <= 1 then
+                        1
+
+                    else
+                        box.width - record.x
+
+                newXPos =
+                    if box.width == 1 then
+                        existingPosRecord.x
+
+                    else
+                        existingPosRecord.x + record.x
+
+                newYPos =
+                    if box.height == 1 then
+                        existingPosRecord.y
+
+                    else
+                        existingPosRecord.y + record.y
+            in
+            { box
+                | height = newHeight
+                , width = newWidth
+                , position = Vector2.vec2 newXPos newYPos
             }
 
         _ ->
@@ -119,17 +186,11 @@ allBoxes { movingBox, idleBoxes } =
         |> Maybe.withDefault idleBoxes
 
 
-startDragging : Id -> BoxGroup -> BoxGroup
-startDragging id ({ idleBoxes, movingBox } as group) =
+startDragging : DragDetails -> BoxGroup -> BoxGroup
+startDragging details ({ idleBoxes, movingBox } as group) =
     let
         ( targetAsList, others ) =
-            List.partition (\box -> id.uid == box.id.uid) idleBoxes
-
-        _ =
-            Debug.log "targetAsList" targetAsList
-
-        _ =
-            Debug.log "others" others
+            List.partition (\box -> details.uid == box.details.uid) idleBoxes
     in
     { group
         | idleBoxes = others
@@ -152,15 +213,15 @@ dragActiveBy delta corner group =
 
 type alias Model =
     { boxGroup : BoxGroup
-    , drag : Draggable.State Id
+    , drag : Draggable.State DragDetails
     , currentCorner : Corner
     }
 
 
 type Msg
-    = DragMsg (Draggable.Msg Id)
+    = DragMsg (Draggable.Msg DragDetails)
     | OnDragBy Vec2
-    | StartDragging Id
+    | StartDragging DragDetails
     | StopDragging
     | AddBox
 
@@ -175,7 +236,7 @@ init _ =
     )
 
 
-dragConfig : Draggable.Config Id Msg
+dragConfig : Draggable.Config DragDetails Msg
 dragConfig =
     Draggable.customConfig
         [ onDragBy (\( dx, dy ) -> Vector2.vec2 dx dy |> OnDragBy)
@@ -193,8 +254,8 @@ update msg ({ boxGroup } as model) =
             in
             ( { model | boxGroup = boxGroup |> dragActiveBy delta corner }, Cmd.none )
 
-        StartDragging id ->
-            ( { model | currentCorner = id.corner, boxGroup = boxGroup |> startDragging id }, Cmd.none )
+        StartDragging details ->
+            ( { model | currentCorner = details.corner, boxGroup = boxGroup |> startDragging details }, Cmd.none )
 
         StopDragging ->
             ( { model | boxGroup = boxGroup |> stopDragging }, Cmd.none )
@@ -225,12 +286,17 @@ view { boxGroup } =
     Html.div
         []
         [ Html.div [] [ Html.button [ onClick AddBox ] [ Html.text "Add Box" ] ]
-        , Svg.svg
-            [ Attr.style "top: 20px; height: 100vh; width: 100vw; position: absolute;"
+        , Html.div
+            [ Html.Attributes.class "svg-container"
+            , onMouseUp StopDragging
             ]
-            [ boxesView boxGroup
+            [ Svg.svg
+                [ Attr.style "top: 20px; height: 100vh; width: 100vw; position: absolute;"
+                ]
+                [ boxesView boxGroup
+                ]
+            , Html.img [ Html.Attributes.src "img/p1.png" ] []
             ]
-        , Html.img [ Html.Attributes.src "img/dan-da-dan.jpg" ] []
         ]
 
 
@@ -244,10 +310,10 @@ boxesView boxGroup =
 
 
 boxView : Box -> List (Svg Msg)
-boxView { id, position, height, width } =
+boxView { details, position, height, width } =
     let
         uid =
-            id.uid
+            details.uid
     in
     [ Svg.rect
         [ num Attr.width <| width
@@ -258,7 +324,6 @@ boxView { id, position, height, width } =
         , Attr.stroke "white"
         , Attr.cursor "move"
         , Draggable.mouseTrigger { uid = uid, corner = None } DragMsg
-        , onMouseUp StopDragging
         ]
         []
     , Svg.circle
@@ -267,7 +332,22 @@ boxView { id, position, height, width } =
         , Attr.r "5"
         , Attr.fill "red"
         , Draggable.mouseTrigger { uid = uid, corner = BottomRight } DragMsg
-        , onMouseUp StopDragging
+        ]
+        []
+    , Svg.circle
+        [ Attr.cx (String.fromFloat (getX position + width))
+        , Attr.cy (String.fromFloat (getY position))
+        , Attr.r "5"
+        , Attr.fill "red"
+        , Draggable.mouseTrigger { uid = uid, corner = TopRight } DragMsg
+        ]
+        []
+    , Svg.circle
+        [ Attr.cx (String.fromFloat (getX position))
+        , Attr.cy (String.fromFloat (getY position))
+        , Attr.r "5"
+        , Attr.fill "red"
+        , Draggable.mouseTrigger { uid = uid, corner = TopLeft } DragMsg
         ]
         []
     ]
