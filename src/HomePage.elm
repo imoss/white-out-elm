@@ -282,7 +282,7 @@ view { boxGroup, hoverBoxId, savedOutput } =
     Html.div
         []
         [ Html.div [ HA.height 30 ]
-            [ Html.button [ onClick AddBox ] [ Html.text "Add Box" ]
+            [ Html.button [ onClick AddBox ] [ Html.text "Add Redaction" ]
             , Html.button [ onClick Save ] [ Html.text "Save" ]
             ]
         , Html.div
@@ -435,7 +435,7 @@ buildOutput boxes =
                     []
                     [ Html.text
                         (String.concat
-                            [ "Box at ("
+                            [ "Redaction at ("
                             , String.fromFloat (getX position)
                             , ", "
                             , String.fromFloat (getY position)

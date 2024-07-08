@@ -6746,7 +6746,7 @@ var $author$project$HomePage$buildOutput = function (boxes) {
 						$elm$core$String$concat(
 							_List_fromArray(
 								[
-									'Box at (',
+									'Redaction at (',
 									$elm$core$String$fromFloat(
 									$elm_explorations$linear_algebra$Math$Vector2$getX(position)),
 									', ',
@@ -7471,7 +7471,7 @@ var $author$project$HomePage$view = function (_v0) {
 							]),
 						_List_fromArray(
 							[
-								$elm$html$Html$text('Add Box')
+								$elm$html$Html$text('Add Redaction')
 							])),
 						A2(
 						$elm$html$Html$button,
