@@ -99,6 +99,7 @@ type Msg
     | DisplayCorners Uid
     | HideCorners
     | Save
+    | Clear
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -127,6 +128,9 @@ update msg ({ boxGroup } as model) =
 
         Save ->
             ( { model | savedOutput = allBoxes boxGroup |> buildOutput }, Cmd.none )
+
+        Clear ->
+            ( { model | boxGroup = makeBoxGroup [] }, Cmd.none )
 
 
 makeBox : DragDetails -> Vec2 -> Box
@@ -284,6 +288,7 @@ view { boxGroup, hoverBoxId, savedOutput } =
         [ Html.div [ HA.height 30 ]
             [ Html.button [ onClick AddBox ] [ Html.text "Add Redaction" ]
             , Html.button [ onClick Save ] [ Html.text "Save" ]
+            , Html.button [ onClick Clear ] [ Html.text "Clear" ]
             ]
         , Html.div
             [ HA.class "svg-container"

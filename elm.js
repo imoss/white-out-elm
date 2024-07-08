@@ -7103,7 +7103,7 @@ var $author$project$HomePage$update = F2(
 						model,
 						{hoverBoxId: $elm$core$Maybe$Nothing}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'Save':
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -7112,9 +7112,18 @@ var $author$project$HomePage$update = F2(
 								$author$project$HomePage$allBoxes(boxGroup))
 						}),
 					$elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							boxGroup: $author$project$HomePage$makeBoxGroup(_List_Nil)
+						}),
+					$elm$core$Platform$Cmd$none);
 		}
 	});
 var $author$project$HomePage$AddBox = {$: 'AddBox'};
+var $author$project$HomePage$Clear = {$: 'Clear'};
 var $author$project$HomePage$Save = {$: 'Save'};
 var $author$project$HomePage$StopDragging = {$: 'StopDragging'};
 var $author$project$HomePage$BottomLeft = {$: 'BottomLeft'};
@@ -7482,6 +7491,16 @@ var $author$project$HomePage$view = function (_v0) {
 						_List_fromArray(
 							[
 								$elm$html$Html$text('Save')
+							])),
+						A2(
+						$elm$html$Html$button,
+						_List_fromArray(
+							[
+								$elm$html$Html$Events$onClick($author$project$HomePage$Clear)
+							]),
+						_List_fromArray(
+							[
+								$elm$html$Html$text('Clear')
 							]))
 					])),
 				A2(
