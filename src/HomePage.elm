@@ -277,7 +277,7 @@ view { boxGroup, hoverBoxId, savedOutput } =
             500
 
         width =
-            650
+            500
     in
     Html.div
         []
@@ -295,7 +295,7 @@ view { boxGroup, hoverBoxId, savedOutput } =
                 , Attr.width (String.fromInt width)
                 ]
                 [ boxesView boxGroup hoverBoxId ]
-            , Html.img [ HA.src "img/p1.png", HA.width width, HA.height height ] []
+            , Html.img [ HA.src "img/cats.png", HA.width width, HA.height height ] []
             ]
         , Html.div
             [ HA.class "output" ]

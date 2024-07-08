@@ -7448,7 +7448,7 @@ var $author$project$HomePage$view = function (_v0) {
 	var boxGroup = _v0.boxGroup;
 	var hoverBoxId = _v0.hoverBoxId;
 	var savedOutput = _v0.savedOutput;
-	var width = 650;
+	var width = 500;
 	var height = 500;
 	return A2(
 		$elm$html$Html$div,
@@ -7511,7 +7511,7 @@ var $author$project$HomePage$view = function (_v0) {
 						$elm$html$Html$img,
 						_List_fromArray(
 							[
-								$elm$html$Html$Attributes$src('img/p1.png'),
+								$elm$html$Html$Attributes$src('img/cats.png'),
 								$elm$html$Html$Attributes$width(width),
 								$elm$html$Html$Attributes$height(height)
 							]),
