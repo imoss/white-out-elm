@@ -349,18 +349,11 @@ boxView maybeHoverUid { details, position, height, width } =
             , Attr.strokeWidth "2"
             , Attr.fillOpacity ".5"
             , Attr.visibility cornerVisibility
+            , Html.Events.onMouseLeave HideCorners
+            , Html.Events.onMouseEnter (DisplayCorners details.uid)
             ]
     in
     [ Svg.rect
-        [ num Attr.width <| width + (cornerRadius * 2)
-        , num Attr.height <| height + (cornerRadius * 2)
-        , num Attr.x (getX position - cornerRadius)
-        , num Attr.y (getY position - cornerRadius)
-        , Attr.fillOpacity "0"
-        , Svg.Events.onMouseOut HideCorners
-        ]
-        []
-    , Svg.rect
         [ num Attr.width <| width
         , num Attr.height <| height
         , num Attr.x (getX position)
@@ -368,8 +361,9 @@ boxView maybeHoverUid { details, position, height, width } =
         , Attr.fill "white"
         , Attr.stroke "white"
         , Attr.cursor "move"
-        , Svg.Events.onMouseOver (DisplayCorners details.uid)
         , Draggable.mouseTrigger { uid = details.uid, corner = None } DragMsg
+        , Html.Events.onMouseLeave HideCorners
+        , Html.Events.onMouseEnter (DisplayCorners details.uid)
         ]
         []
     , Svg.circle
