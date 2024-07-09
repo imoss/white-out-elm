@@ -12,7 +12,6 @@ import Html.Events exposing (onClick, onMouseUp)
 import Math.Vector2 as Vector2 exposing (Vec2, getX, getY)
 import Svg exposing (Svg)
 import Svg.Attributes as Attr
-import Svg.Events
 
 
 
